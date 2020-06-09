@@ -9,7 +9,7 @@ CP decomposition works fine with classifying the MNIST dataset, it can compress 
 Tucker decomposition is strictly superior to CP in almost every way. It has more sucess decomposing larger networks, and requires less resources in terms of runtime and memory. It is also more tolerant to larger values of learning rates, allowing the network to learn faster. The network decomposed with Tucker also learns faster, i.e., yields greater accuracy in fewer epochs (see the analysis of performance graphs for details).
 
 ## Graphs
-![](https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/edit/master/asset/cifar.png)
+![1](https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/edit/master/asset/cifar.png)
 
-![](https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/edit/master/asset/mnist.png)
+![2](https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/edit/master/asset/mnist.png)
 From this performance graph, we can see that the Tucker-decomposed network learns much faster than the CP-decomposed net.
