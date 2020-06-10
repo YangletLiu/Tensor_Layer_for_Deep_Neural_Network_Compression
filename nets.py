@@ -25,7 +25,6 @@ class Net(nn.Module):
             nn.ReLU(inplace=True),
             nn.Dropout(0.5),
             nn.Linear(128, 10),
-            
         )
 
     def forward(self, x):
@@ -47,7 +46,13 @@ class VGG(nn.Module):
     def __init__(self, vgg_name):
         super(VGG, self).__init__()
         self.features = self._make_layers(cfg[vgg_name])
-        self.classifier = nn.Linear(512, 10)
+        self.classifier = nn.Sequential(
+            nn.Dropout(0.25),
+            nn.Linear(512, 128),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.25),
+            nn.Linear(128, 10),
+        )
 
     def forward(self, x):
         out = self.features(x)
