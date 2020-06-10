@@ -12,7 +12,7 @@ from torchvision import models
 import tensorly as tl
 import tensorly
 from itertools import chain
-from tensorly.decomposition import parafac, partial_tucker
+from tensorly.decomposition import parafac, partial_tucker, matrix_product_state
 
 import os
 import matplotlib.pyplot as plt
@@ -22,6 +22,8 @@ import time
 
 def cp_decomposition_conv_layer(layer, rank):
     l, f, v, h = parafac(layer.weight.data, rank=rank)[1]
+    factors = [l, f, v, h]
+    #print([f.shape for f in factors])
     
     pointwise_s_to_r_layer = torch.nn.Conv2d(
             in_channels=f.shape[0], 
@@ -68,11 +70,14 @@ def cp_decomposition_conv_layer(layer, rank):
 
     new_layers = [pointwise_s_to_r_layer, depthwise_vertical_layer, 
                   depthwise_horizontal_layer, pointwise_r_to_t_layer]
+    #for l in new_layers:
+    #    print(l.weight.data.shape)
     
     return nn.Sequential(*new_layers)
 
 def tucker_decomposition_conv_layer(layer, ranks):
     core, [last, first] = partial_tucker(layer.weight.data, modes=[0, 1], ranks=ranks, init='svd')
+    #print(core.shape, last.shape, first.shape)
 
     # A pointwise convolution that reduces the channels from S to R3
     first_layer = torch.nn.Conv2d(in_channels=first.shape[0], 
@@ -97,16 +102,45 @@ def tucker_decomposition_conv_layer(layer, ranks):
     core_layer.weight.data = core
 
     new_layers = [first_layer, core_layer, last_layer]
+    #for l in new_layers:
+    #    print(l.weight.data.shape)
     return nn.Sequential(*new_layers)
 
 def tt_decomposition_conv_layer(layer, ranks):
-    cores = matrix_product_state(layer.weight.data, rank)
-    core_layers = []
-    
-    for core in range(1, len(cores) - 1):
-        core_layer = torch.nn.Conv2d(in_channels=core.shape[1], 
-                out_channels=core.shape[0], kernel_size=layer.kernel_size,
-                stride=layer.stride, padding=layer.padding, dilation=layer.dilation, bias=False)
-        core_layer.weight.data = core
+    data = layer.weight.data
+    data2D = tl.base.unfold(data, 0)
 
-    return nn.Sequential(*cores)
+    first, last = matrix_product_state(data2D, rank=ranks)
+    factors = [first, last]
+    #print([f.shape for f in factors])
+    
+    first = first.reshape(data.shape[0], ranks, 1, 1)
+    last = last.reshape(ranks, data.shape[1], layer.kernel_size[0], layer.kernel_size[1])
+    
+    pointwise_s_to_r_layer = torch.nn.Conv2d(
+            in_channels=last.shape[1], 
+            out_channels=last.shape[0], 
+            kernel_size=layer.kernel_size, 
+            stride=layer.stride, 
+            padding=layer.padding, 
+            dilation=layer.dilation, 
+            bias=False)
+
+    pointwise_r_to_t_layer = torch.nn.Conv2d(
+            in_channels=first.shape[1], 
+            out_channels=first.shape[0], 
+            kernel_size=1, 
+            stride=1,
+            padding=0, 
+            dilation=layer.dilation, 
+            bias=True)
+    
+    pointwise_r_to_t_layer.bias.data = layer.bias.data
+    pointwise_s_to_r_layer.weight.data = last
+    pointwise_r_to_t_layer.weight.data = first
+
+    new_layers = [pointwise_s_to_r_layer, pointwise_r_to_t_layer]
+    #for l in new_layers:
+    #    print(l.weight.data.shape)
+    
+    return nn.Sequential(*new_layers)
