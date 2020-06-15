@@ -4,9 +4,9 @@ Apply CP, Tucker, TT/TR, HT to compress neural networks. Train from scratch.
 ## References
 #### Papers:
 
-"Speeding-up Convolutional Neural Networks Using Fine-tuned CP-Decomposition"
+Lebedev, Vadim, Yaroslav Ganin, Maksim Rakhuba, Ivan Oseledets, and Victor Lempitsky. "Speeding-up convolutional neural networks using fine-tuned cp-decomposition." ICLR 2015.
 
-"Tensorizing Neural Networks"
+Novikov, A., Podoprikhin, D., Osokin, A. and Vetrov, D.P. Tensorizing neural networks. In Advances in Neural Information Processing Systems, pp. 442-450, 2015.
 
 
 #### Github repos:
