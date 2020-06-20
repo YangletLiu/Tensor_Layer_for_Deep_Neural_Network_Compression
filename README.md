@@ -1,35 +1,6 @@
 # Tensor_Layer_for_Deep_Neural_Network_Compression
 Apply CP, Tucker, TT/TR, HT to compress neural networks. Train from scratch.
 
-## References
-### List of relevent papers:
-
-* Lebedev, V., Ganin, Y., Rakhuba, M., Oseledets, I. and Lempitsky, V., 2015. Speeding-up convolutional neural networks using fine-tuned CP-decomposition. In 3rd International Conference on Learning Representations, ICLR 2015-Conference Track Proceedings.
-  * *Notes: applies CP to convlayers.*
-  
-* Kim, Y.D., Park, E., Yoo, S., Choi, T., Yang, L. and Shin, D., 2015. Compression of Deep Convolutional Neural Networks for Fast and Low Power Mobile Applications. arXiv, pp.arXiv-1511.
-  * *Notes: applies Tucker to convlayers*
-
-* Garipov, T., Podoprikhin, D., Novikov, A. and Vetrov, D., 2016. Ultimate tensorization: compressing convolutional and FC   layers alike. arXiv, pp.arXiv-1611.
-  * *Notes: applies TT to both conv and FC layers* 
-
-* Novikov, A., Podoprikhin, D., Osokin, A. and Vetrov, D.P., 2015. Tensorizing neural networks. In Advances in neural information processing systems (pp. 442-450).
-  * *Notes: applies TT to FC layers*
-
-* Wang, W., Sun, Y., Eriksson, B., Wang, W. and Aggarwal, V., 2018. Wide compression: Tensor ring nets. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (pp. 9329-9338).
-  * *Notes: applies TR to both conv and FC layers*
-
-* Cohen, N., Sharir, O., Levine, Y., Tamari, R., Yakira, D. and Shashua, A., 2017. Analysis and Design of Convolutional Networks via Hierarchical Tensor Decompositions. arXiv, pp.arXiv-1705.
-  * *Notes: applies HT to convlayers*
-
-* Yang, Y., Krompass, D. and Tresp, V., 2017. Tensor-train recurrent neural networks for video classification. arXiv preprint arXiv:1707.01786.
-  * *Notes: applies TT to sequential models*
-
-### Github repos:
-
-https://github.com/jacobgil/pytorch-tensor-decompositions
-
-https://github.com/JeanKossaifi/tensorly-notebooks
 
 ## Method
 I aim to decompose the neural network in both the convolutional portion and the fully connected portion, using popular tensor decomposition algorithms such as CP, Tucker, TT and HT.  In doing so, I hope to speedup the training process and reduce the number of parameters without signicant sacrifices in terms of accuracy.
@@ -51,15 +22,22 @@ I tested the performance of the three compression methods against the uncompress
 
 <div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/MNIST_train.png"/></div>
 <div align=center>Figure 1. Training accuracy comparision on the MNIST dataset.</div>
+
+
 <div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/MNIST_test.png"/></div>
 <div align=center>Figure 2. Testing accuracy comparision on the MNIST dataset.</div>
 
+
 From this performance graph, we can see that even though the CP-decomposed network has higher training accuracy at the end, its testing accuracy is low, likely resulting from overfitting due to a finer learning rate.  TT-decomposed network learns faster than Tucker and yields better results.  In terms of run time, the four networks do not differ from each other significantly. 
+
 
 <div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/CIRAR10_train.png"/></div>
 <div align=center>Figure 3. Training accuracy comparision on the CIAR10 dataset.</div>
+
+
 <div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/CIFAR10_test.png"/></div>
 <div align=center>Figure 4. Testing accuracy comparision on the CIAR10 dataset.</div>
+
 
 For the uncompressed network, the average time for each epoch is around 38 seconds, the average time for the Tucker-decomposed network is 26 seconds, and the average time for the TT-decomposed network is 27 seconds.  In terms of accuracy, the TT-decomposed network outperforms Tucker in both training and testing, and is almost comparable to the original network before compression.
 
@@ -93,3 +71,35 @@ In a typical training process, the profiling output is:
   3010000   15.967    0.000   15.967    0.000 {method 'clone' of 'torch._C._TensorBase' objects}
     19550   15.331    0.001  168.502    0.009 sgd.py:71(step)
 ```
+
+## References
+### List of relevent papers:
+
+* Lebedev, V., Ganin, Y., Rakhuba, M., Oseledets, I. and Lempitsky, V., 2015. Speeding-up convolutional neural networks using fine-tuned CP-decomposition. In 3rd International Conference on Learning Representations, ICLR 2015-Conference Track Proceedings.
+  * *Notes: applies CP to convlayers.*
+  
+* Kim, Y.D., Park, E., Yoo, S., Choi, T., Yang, L. and Shin, D., 2015. Compression of Deep Convolutional Neural Networks for Fast and Low Power Mobile Applications. arXiv, pp.arXiv-1511.
+  * *Notes: applies Tucker to convlayers*
+
+* Garipov, T., Podoprikhin, D., Novikov, A. and Vetrov, D., 2016. Ultimate tensorization: compressing convolutional and FC   layers alike. arXiv, pp.arXiv-1611.
+  * *Notes: applies TT to both conv and FC layers* 
+
+* Novikov, A., Podoprikhin, D., Osokin, A. and Vetrov, D.P., 2015. Tensorizing neural networks. In Advances in neural information processing systems (pp. 442-450).
+  * *Notes: applies TT to FC layers*
+
+* Wang, W., Sun, Y., Eriksson, B., Wang, W. and Aggarwal, V., 2018. Wide compression: Tensor ring nets. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (pp. 9329-9338).
+  * *Notes: applies TR to both conv and FC layers*
+
+* Cohen, N., Sharir, O., Levine, Y., Tamari, R., Yakira, D. and Shashua, A., 2017. Analysis and Design of Convolutional Networks via Hierarchical Tensor Decompositions. arXiv, pp.arXiv-1705.
+  * *Notes: applies HT to convlayers*
+
+* Yang, Y., Krompass, D. and Tresp, V., 2017. Tensor-train recurrent neural networks for video classification. arXiv preprint arXiv:1707.01786.
+  * *Notes: applies TT to sequential models*
+
+### Github repos:
+
+https://github.com/jacobgil/pytorch-tensor-decompositions
+
+https://github.com/JeanKossaifi/tensorly-notebooks
+
+https://github.com/vadim-v-lebedev/cp-decomposition
