@@ -96,7 +96,7 @@ In a typical training process, the profiling output is:
 * Yang, Y., Krompass, D. and Tresp, V., 2017. Tensor-train recurrent neural networks for video classification. arXiv preprint arXiv:1707.01786.
   * *Notes: applies TT to sequential models*
 
-### Github repos:
+### Related Github repos:
 
 https://github.com/jacobgil/pytorch-tensor-decompositions
 
