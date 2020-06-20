@@ -8,7 +8,7 @@ Lebedev, V., Ganin, Y., Rakhuba, M., Oseledets, I. and Lempitsky, V., 2015. Spee
 
 *Notes: applies CP to convlayers.*
 
-Garipov, T., Podoprikhin, D., Novikov, A. and Vetrov, D., 2016. Ultimate tensorization: compressing convolutional and FC layers alike. arXiv, pp.arXiv-1611.
+Garipov, T., Podoprikhin, D., Novikov, A. and Vetrov, D., 2016. Ultimate tensorization: compressing convolutional and FC layers alike. NIPS 2016 workshop: Learning with Tensors: Why Now and How?
 
 *Notes: applies TT to both conv and FC layers* 
 
@@ -24,7 +24,7 @@ Cohen, N., Sharir, O., Levine, Y., Tamari, R., Yakira, D. and Shashua, A., 2017.
 
 *Notes: applies HT to convlayers*
 
-Yang, Y., Krompass, D. and Tresp, V., 2017. Tensor-train recurrent neural networks for video classification. arXiv preprint arXiv:1707.01786.
+Yang, Y., Krompass, D. and Tresp, V., 2017. Tensor-train recurrent neural networks for video classification. In International Conference on Machine Learning, pp. 3891-3900. 2017.
 
 *Notes: applies TT to sequential models*
 
