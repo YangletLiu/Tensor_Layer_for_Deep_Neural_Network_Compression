@@ -2,14 +2,33 @@
 Apply CP, Tucker, TT/TR, HT to compress neural networks. Train from scratch.
 
 ## References
-#### Papers:
+### List of relevent papers:
 
-Lebedev, Vadim, Yaroslav Ganin, Maksim Rakhuba, Ivan Oseledets, and Victor Lempitsky. "Speeding-up convolutional neural networks using fine-tuned cp-decomposition." ICLR 2015.
+Lebedev, V., Ganin, Y., Rakhuba, M., Oseledets, I. and Lempitsky, V., 2015. Speeding-up convolutional neural networks using fine-tuned CP-decomposition. In 3rd International Conference on Learning Representations, ICLR 2015-Conference Track Proceedings.
 
-Novikov, A., Podoprikhin, D., Osokin, A. and Vetrov, D.P. Tensorizing neural networks. In Advances in Neural Information Processing Systems, pp. 442-450, 2015.
+*Notes: applies CP to convlayers.*
 
+Garipov, T., Podoprikhin, D., Novikov, A. and Vetrov, D., 2016. Ultimate tensorization: compressing convolutional and FC layers alike. arXiv, pp.arXiv-1611.
 
-#### Github repos:
+*Notes: applies TT to both conv and FC layers* 
+
+Novikov, A., Podoprikhin, D., Osokin, A. and Vetrov, D.P., 2015. Tensorizing neural networks. In Advances in neural information processing systems (pp. 442-450).
+
+*Notes: applies TT to FC layers*
+
+Wang, W., Sun, Y., Eriksson, B., Wang, W. and Aggarwal, V., 2018. Wide compression: Tensor ring nets. In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition (pp. 9329-9338).
+
+*Notes: applies TR to both conv and FC layers*
+
+Cohen, N., Sharir, O., Levine, Y., Tamari, R., Yakira, D. and Shashua, A., 2017. Analysis and Design of Convolutional Networks via Hierarchical Tensor Decompositions. arXiv, pp.arXiv-1705.
+
+*Notes: applies HT to convlayers*
+
+Yang, Y., Krompass, D. and Tresp, V., 2017. Tensor-train recurrent neural networks for video classification. arXiv preprint arXiv:1707.01786.
+
+*Notes: applies TT to sequential models*
+
+### Github repos:
 
 https://github.com/jacobgil/pytorch-tensor-decompositions
 
