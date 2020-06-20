@@ -20,24 +20,20 @@ Have not yet developed.
 ## Experiments
 I tested the performance of the three compression methods against the uncompressed network on the MNIST and the CIFAR10 datasets.  I tried to keep all hyperparameters the same for all tests, including rank, number of epochs, and learning rate.  However, as CP is too sensitive to learning rate, I give it a much smaller value for learning rate.
 
-<div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/MNIST_train.png"/></div>
+<div><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/MNIST_train.png"/></div>
 <div align=center>Figure 1. Training accuracy comparision on the MNIST dataset.</div>
 
-
-<div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/MNIST_test.png"/></div>
+<div><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/MNIST_test.png"/></div>
 <div align=center>Figure 2. Testing accuracy comparision on the MNIST dataset.</div>
-
 
 From this performance graph, we can see that even though the CP-decomposed network has higher training accuracy at the end, its testing accuracy is low, likely resulting from overfitting due to a finer learning rate.  TT-decomposed network learns faster than Tucker and yields better results.  In terms of run time, the four networks do not differ from each other significantly. 
 
 
-<div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/CIRAR10_train.png"/></div>
+<div><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/CIRAR10_train.png"/></div>
 <div align=center>Figure 3. Training accuracy comparision on the CIAR10 dataset.</div>
 
-
-<div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/CIFAR10_test.png"/></div>
+<div><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/CIFAR10_test.png"/></div>
 <div align=center>Figure 4. Testing accuracy comparision on the CIAR10 dataset.</div>
-
 
 For the uncompressed network, the average time for each epoch is around 38 seconds, the average time for the Tucker-decomposed network is 26 seconds, and the average time for the TT-decomposed network is 27 seconds.  In terms of accuracy, the TT-decomposed network outperforms Tucker in both training and testing, and is almost comparable to the original network before compression.
 
@@ -96,6 +92,9 @@ In a typical training process, the profiling output is:
 * Yang, Y., Krompass, D. and Tresp, V., 2017. Tensor-train recurrent neural networks for video classification. arXiv preprint arXiv:1707.01786.
   * *Notes: applies TT to sequential models*
 
+* Yin, M., Liao, S., Liu, X.Y., Wang, X. and Yuan, B., 2020. Compressing Recurrent Neural Networks Using Hierarchical Tucker Tensor Decomposition. arXiv, pp.arXiv-2005.
+  * *Notes: applies HT to LSTMs*
+  
 ### Related Github repos:
 
 https://github.com/jacobgil/pytorch-tensor-decompositions
@@ -103,3 +102,5 @@ https://github.com/jacobgil/pytorch-tensor-decompositions
 https://github.com/JeanKossaifi/tensorly-notebooks
 
 https://github.com/vadim-v-lebedev/cp-decomposition
+
+https://github.com/timgaripov/TensorNet-TF
