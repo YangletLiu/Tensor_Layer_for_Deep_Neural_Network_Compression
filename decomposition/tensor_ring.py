@@ -4,6 +4,7 @@ import numpy as np
 
 
 def tensor_ring(input_tensor, rank):
+    
     '''Tensor ring (TR) decomposition via recursive SVD
 
         Decomposes input_tensor into a sequence of order-3 tensors (factors),
