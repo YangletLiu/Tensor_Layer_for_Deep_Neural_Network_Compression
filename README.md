@@ -22,11 +22,11 @@ The function has a few parameters:
 * `model`: the neural network model defined in the last step
 * `decomp`: the method of decomposition; defaulted to be `None` (undecomposed)
 * `i`: number of iterations for training; defaulted to be 100
-* `rate`: learning rate; defaulted to be 0.1
+* `rate`: learning rate; defaulted to be 0.05
 
 This example below runs the CP-decomposed LeNet on the MNIST dataset for 150 iterations with a learning rate of 0.1:
 ```
-run_all('mnist', model0, decomp='cp', i=100, rate=0.05)
+run_all('mnist', model0, decomp='cp', i=150, rate=0.1)
 ```
 This function creates three subdirectories:
 * `data`: stores the dataset
@@ -59,9 +59,11 @@ I tested the performance of the three compression methods against the uncompress
 
 <div align=center>Figure 1. Training accuracy comparision on the MNIST dataset.</div>
 
+
 <div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/MNIST_test.png"/></div>
 
 <div align=center>Figure 2. Testing accuracy comparision on the MNIST dataset.</div>
+
 
 
 From this performance graph, we can see that even though the CP-decomposed network has higher training accuracy at the end, its testing accuracy is low, likely resulting from overfitting due to a finer learning rate.  TT-decomposed network learns faster than Tucker and yields better results.  In terms of run time, the four networks do not differ from each other significantly. 
@@ -71,9 +73,11 @@ From this performance graph, we can see that even though the CP-decomposed netwo
 
 <div align=center>Figure 3. Training accuracy comparision on the CIAR10 dataset.</div>
 
+
 <div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/CIFAR10_test.png"/></div>
 
 <div align=center>Figure 4. Testing accuracy comparision on the CIAR10 dataset.</div>
+
 
 
 For the uncompressed network, the average time for each epoch is around 38 seconds, the average time for the Tucker-decomposed network is 26 seconds, and the average time for the TT-decomposed network is 27 seconds.  In terms of accuracy, the TT-decomposed network outperforms Tucker in both training and testing, and is almost comparable to the original network before compression.
