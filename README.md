@@ -1,6 +1,38 @@
 # Tensor_Layer_for_Deep_Neural_Network_Compression
 Apply CP, Tucker, TT/TR, HT to compress neural networks. Train from scratch.
 
+## Usage
+
+First, import required modules by
+```
+from common import *
+from decomposition import *
+from nets import *
+```
+
+Then, specify a neural network model.  The user can choose from any model provided by the nets package, or can define a new architecture using pytorch.  Examples:
+```
+model0 = LeNet()
+model1 = VGG('VGG16')
+```
+
+Finally, go through the training and testing process using the `run_all` function.  
+The function has a few parameters:
+* `dataset`: choose a dataset from mnist, cifar10, and cifar100
+* `model`: the neural network model defined in the last step
+* `decomp`: the method of decomposition; defaulted to be `None` (undecomposed)
+* `i`: number of iterations for training; defaulted to be 100
+* `rate`: learning rate; defaulted to be 0.1
+
+This example below runs the CP-decomposed LeNet on the MNIST dataset for 150 iterations with a learning rate of 0.1:
+```
+run_all('mnist', model0, decomp='cp', i=100, rate=0.05)
+```
+This function creates three subdirectories:
+* `data`: stores the dataset
+* `models`: stores the trained network
+* `cureves`: stores arrays of training and testing accuracy across different iterations in `.npy` format
+
 
 ## Method
 I aim to decompose the neural network in both the convolutional portion and the fully connected portion, using popular tensor decomposition algorithms such as CP, Tucker, TT and HT.  In doing so, I hope to speedup both the training and the inference process and reduce the number of parameters without signicant sacrifices in terms of accuracy.
@@ -14,7 +46,7 @@ Tucker decomposition is strictly superior to CP in almost every way. It has more
 ## Tensor Train (TT)
 In my implementation of compression using tensor train, I picked out the two dimensions in the convolutional layer corresponding to the input/output channels, then I matricized the tensor, decomposed the result to matrix product state, and reshaped them back to 4-dimensional tensors.  This gives us two decomposed convolutional layer for every convolutional layer in the original network.  Experimentally, this method yields better results than Tucker, and has similar rate of compression and speedup as Tucker.  In the two papers by Novikov et al., the authors proposed using a transformation to higher-order tensor before applying TT decomposition.
 
-# Tensor Ring (TR)
+## Tensor Ring (TR) UNDER CONSTRUCTION
 TR decomposition is highly similar to TT, differing only in an additional non-trivial mode on the first and last tensor core. The way it is applied to neural networks is also similar, although researchers argue that TR has greater expressiveness.
 
 ## Hierarchical Tucker (HT)
