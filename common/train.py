@@ -46,6 +46,6 @@ def train(i, model, trainloader, testloader, optimizer):
         scheduler.step()
         e = time.time()
         print('This epoch took', e - s, 'seconds to train')
-        print('Current learning rate: ', scheduler.get_lr()[0])
+        print('Current learning rate: ', scheduler.get_last_lr()[0])
     print('Best training accuracy overall: ', max(test_acc))
     return train_acc, test_acc

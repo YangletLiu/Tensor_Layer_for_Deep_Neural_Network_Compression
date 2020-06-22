@@ -6,7 +6,7 @@ import tensorly as tl
 import tensorly
 from itertools import chain
 
-from conv_layer import *
+from .conv_layer import *
 
 # decompose all layers in a network
 def decompose_all(decomp):
