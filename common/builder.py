@@ -18,7 +18,8 @@ def build(model, decomp='cp'):
         os.mkdir(path)
     torch.save(full_net, path + 'model')
     if decomp:
-        decompose_all(decomp)
+        decompose_conv(decomp)
+        decompose_fc(decomp)
     if device == 'cuda:0':
         net = torch.load(path + "model").cuda()
     else:
