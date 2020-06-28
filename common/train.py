@@ -22,6 +22,7 @@ def train_step(epoch, train_acc, model, trainloader, optimizer):
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
         outputs = model(inputs)
+        print(outputs.shape, targets.shape)
         loss = criterion(outputs, targets)
         loss.backward()
         optimizer.step()
