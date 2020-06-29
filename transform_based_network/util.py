@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[45]:
-
-
 import sys
 sys.path.append('../')
 from common import *
@@ -15,9 +9,6 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 from torch.optim.lr_scheduler import StepLR
-
-
-# In[46]:
 
 
 def bcirc(A):
@@ -60,10 +51,6 @@ def raw_img(img, batch_size, n):
     ultra_img = torch.cat(single_img_T, dim=2)
     return ultra_img
 
-
-# In[47]:
-
-
 class Transform_Layer(nn.Module):
     def __init__(self, size_in, size_out, n):
         super().__init__()
@@ -77,10 +64,6 @@ class Transform_Layer(nn.Module):
     def forward(self, x):
         Wx = t_product(self.weights, x)
         return torch.add(Wx, self.bias)
-
-
-# In[48]:
-
 
 class Transform_Net(nn.Module):
     def __init__(self):
@@ -98,10 +81,6 @@ class Transform_Net(nn.Module):
         x = self.features(x)        
         return x
 
-
-# In[49]:
-
-
 def train_step_transform(epoch, train_acc, model, trainloader, optimizer):  
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     model = model.to(device)
@@ -117,7 +96,6 @@ def train_step_transform(epoch, train_acc, model, trainloader, optimizer):
         inputs = raw_img(inputs, inputs.size(0), 28)
         inputs = inputs.to(device)
         labels = labels.to(device)
-        # print(inputs.shape, labels.shape)
         
         outputs = model(inputs) / 1e4
         outputs = torch.transpose(scalar_tubal_func(outputs), 0, 1)
@@ -139,7 +117,7 @@ def train_step_transform(epoch, train_acc, model, trainloader, optimizer):
     train_acc.append(correct / total)
     return train_acc
 
-def test(test_acc, model, testloader):
+def test_transform(test_acc, model, testloader):
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     model = model.to(device)
     model.eval()
@@ -176,7 +154,7 @@ def train_transform(i, model, trainloader, testloader, optimizer):
     for epoch in range(i):
         s = time.time()
         train_acc = train_step_transform(epoch, train_acc, model, trainloader, optimizer)
-        test_acc, _ = test(test_acc, model, testloader)
+        test_acc, _ = test_transform(test_acc, model, testloader)
         scheduler.step()
         e = time.time()
         print('This epoch took', e - s, 'seconds to train')
@@ -184,78 +162,15 @@ def train_transform(i, model, trainloader, testloader, optimizer):
     print('Best training accuracy overall: ', max(test_acc))
     return train_acc, test_acc
 
-
-# In[50]:
-
-
 model = Transform_Net()
-print(model)
 optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=5e-4)
 trainloader, testloader = load_mnist()
-
-
-# In[51]:
-
-
 train_acc, test_acc = train_transform(25, model, trainloader, testloader, optimizer)
 
 
-# In[63]:
 
 
-def torch_tensor_Bcirc(tensor, l, m, n):
-    tensor_blocks = list(torch.split(tensor, split_size_or_sections=1, dim=0))
-    tensor_blocks.reverse()
-    circ_slices, circ = [], []
-    for i in range(l):
-        tensor_blocks.insert(0, tensor_blocks.pop())
-        for j in tensor_blocks:
-            circ_slices.append(j.reshape(m, n))
-    for i in range(l):
-        circ.append(torch.cat(circ_slices[l * i:l * i + l], dim=1))
-    ulti_circ = torch.cat(circ).reshape(l * m, l * n)
-    return ulti_circ
 
-def torch_tensor_product(tensorA, tensorB):
-    a_l, a_m, a_n = tensorA.shape
-    b_l, b_n, b_p = tensorB.shape
-    assert(a_l == b_l and a_n == b_n)
-    circA = torch_tensor_Bcirc(tensorA, a_l, a_m, a_n)
-    circB = torch_tensor_Bcirc(tensorB, b_l, b_n, b_p)
-    return torch.mm(circA, circB[:, 0:b_p]).reshape(a_l, a_m, b_p)
-
-
-# In[73]:
-
-
-A = torch.rand(50, 50, 50).cuda()
-
-
-# In[74]:
-
-
-get_ipython().run_cell_magic('time', '', 'for i in range(100):\n    torch_tensor_product(A, A)')
-
-
-# In[75]:
-
-
-get_ipython().run_cell_magic('time', '', 'for i in range(100):\n    t_product(A, A)')
-
-
-# In[60]:
-
-
-plt.plot(train_acc, label='Train accuracy')
-plt.plot(test_acc, label='Test accuracy')
-plt.ylim(0.8, 0.96)
-plt.title('Transform-based Network Accuracy on MNIST')
-plt.xlabel('Epoch')
-plt.ylabel('Accuracy')
-plt.legend()
-
-
-# In[ ]:
 
 
 
