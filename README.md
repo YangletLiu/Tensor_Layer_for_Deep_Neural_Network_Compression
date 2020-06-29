@@ -61,34 +61,22 @@ This network is trained in the transform domain: the weights and the training da
 ## Experiments
 I tested the performance of the three compression methods against the uncompressed network on the MNIST and the CIFAR10 datasets.  I tried to keep all hyperparameters the same for all tests, including rank, number of epochs, and learning rate.  However, as CP is too sensitive to learning rate, I give it a much smaller value for learning rate.
 
-<div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/MNIST_train.png"/></div>
+<p align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/MNIST_train.png"/></p>
+<p align=center>Figure 1. Training accuracy comparision on the MNIST dataset.</p>
 
-<div align=center>Figure 1. Training accuracy comparision on the MNIST dataset.</div>
-
-
-<div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/MNIST_test.png"/></div>
-
-<div align=center>Figure 2. Testing accuracy comparision on the MNIST dataset.</div>
-
-
+<p align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/MNIST_test.png"/></p>
+<p align=center>Figure 2. Testing accuracy comparision on the MNIST dataset.</p>
 
 From this performance graph, we can see that even though the CP-decomposed network has higher training accuracy at the end, its testing accuracy is low, likely resulting from overfitting due to a finer learning rate.  TT-decomposed network learns faster than Tucker and yields better results.  In terms of run time, the four networks do not differ from each other significantly. 
 
+<p align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/CIRAR10_train.png"/></p>
+<p align=center>Figure 3. Training accuracy comparision on the CIAR10 dataset.</p>
 
-<div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/CIRAR10_train.png"/></div>
+<p align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/CIFAR10_test.png"/></p>
+<p align=center>Figure 4. Testing accuracy comparision on the CIAR10 dataset.</p>
 
-<div align=center>Figure 3. Training accuracy comparision on the CIAR10 dataset.</div>
-
-
-<div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/CIFAR10_test.png"/></div>
-
-<div align=center>Figure 4. Testing accuracy comparision on the CIAR10 dataset.</div>
-
-
-<div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/transform_based_MNIST.png"/></div>
-
-<div align=center>Figure 5. Training and testing accuracy of transform-based net on MNIST dataset.</div>
-
+<p align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/transfrom_based_MNIST.png"/></p>
+<p align=center>Figure 5. Training and testing accuracy of transform-based net on MNIST dataset.</p>
 
 For the uncompressed network, the average time for each epoch is around 38 seconds, the average time for the Tucker-decomposed network is 26 seconds, and the average time for the TT-decomposed network is 27 seconds.  In terms of accuracy, the TT-decomposed network outperforms Tucker in both training and testing, and is almost comparable to the original network before compression.
 
@@ -150,7 +138,7 @@ In a typical training process, the profiling output is:
 * Yin, M., Liao, S., Liu, X.Y., Wang, X. and Yuan, B., 2020. Compressing Recurrent Neural Networks Using Hierarchical Tucker Tensor Decomposition. arXiv, pp.arXiv-2005.
   * *Notes: applies HT to LSTMs*
   
-*Newman, Elizabeth, et al. "Stable tensor neural networks for rapid deep learning." arXiv preprint arXiv:1811.06569 (2018).
+* Newman, Elizabeth, et al. "Stable tensor neural networks for rapid deep learning." arXiv preprint arXiv:1811.06569 (2018).
   * *Notes: transform-based tensor neural network*
   
 ### Related Github repos:
