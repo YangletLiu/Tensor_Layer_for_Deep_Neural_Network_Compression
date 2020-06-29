@@ -24,10 +24,11 @@ sys.path.append('..')
 from common import *
 from decomposition import *
 from nets import *
+from transform_based_network import *
 
 
 # main function
-def run_all(dataset, model, decomp=None, i=100, rate=0.05): 
+def run_all(dataset, model, decomp=None, i=100, rate=0.05, transform_based=False): 
     
     # choose dataset from (MNIST, CIFAR10, ImageNet)
     if dataset == 'mnist':
@@ -38,14 +39,19 @@ def run_all(dataset, model, decomp=None, i=100, rate=0.05):
         trainloader, testloader = load_cifar100()
 
     # choose decomposition algorithm from (CP, Tucker, TT)
-    net = build(model, decomp)
-    optimizer = optim.SGD(net.parameters(), lr=rate, momentum=0.9, weight_decay=5e-4)
-    train_acc, test_acc = train(i, net, trainloader, testloader, optimizer)
-    _, inf_time = test([], net, testloader)
-    
-    if not decomp:
-        decomp = 'full'
-    filename = dataset + '_' + decomp
+    if not transform_based:
+        net = build(model, decomp)
+        optimizer = optim.SGD(net.parameters(), lr=rate, momentum=0.9, weight_decay=5e-4)
+        train_acc, test_acc = train(i, net, trainloader, testloader, optimizer)
+        _, inf_time = test([], net, testloader)
+
+        if not decomp:
+            decomp = 'full'
+        filename = dataset + '_' + decomp
+    else:
+        net = Transform_Net()
+        optimizer = optim.SGD(net.parameters(), lr=rate, momentum=0.9, weight_decay=5e-4)
+        train_acc, test_acc = train_transform(25, model, trainloader, testloader, optimizer)
     
     torch.save(net, 'models/' + filename)
     path = 'curves/'
