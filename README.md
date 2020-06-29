@@ -23,6 +23,9 @@ The function has a few parameters:
 * `decomp`: the method of decomposition; defaulted to be `None` (undecomposed)
 * `i`: number of iterations for training; defaulted to be 100
 * `rate`: learning rate; defaulted to be 0.05
+* `transform_based`: whether to use transform_based network; defaulted to be False.
+  * To use the transform-based net, it is advised to run a small number of epochs, as the training process is much slower than convolutional nets.
+  * The decomposition option for transform-based net is currently under construction, so it is temporarily disabled.
 
 This example below runs the CP-decomposed LeNet on the MNIST dataset for 150 iterations with a learning rate of 0.1:
 ```
@@ -52,6 +55,9 @@ TR decomposition is highly similar to TT, differing only in an additional non-tr
 ## Hierarchical Tucker (HT)
 Have not yet developed.
 
+## Transform-based networks
+This network is trained in the transform domain: the weights and the training data are passed into the network after applying a tensor product between them.  The outputs are evaluated against the tubal version of the softmax objective function after an inverse transformation (idct) in the last layer.  The backprop process is handled by the pytorch's builtin autograd functions.
+
 ## Experiments
 I tested the performance of the three compression methods against the uncompressed network on the MNIST and the CIFAR10 datasets.  I tried to keep all hyperparameters the same for all tests, including rank, number of epochs, and learning rate.  However, as CP is too sensitive to learning rate, I give it a much smaller value for learning rate.
 
@@ -78,6 +84,10 @@ From this performance graph, we can see that even though the CP-decomposed netwo
 
 <div align=center>Figure 4. Testing accuracy comparision on the CIAR10 dataset.</div>
 
+
+<div align=center><img width="400" src="https://github.com/hust512/Tensor_Layer_for_Deep_Neural_Network_Compression/blob/master/asset/transform_based_MNIST.png"/></div>
+
+<div align=center>Figure 5. Training and testing accuracy of transform-based net on MNIST dataset.</div>
 
 
 For the uncompressed network, the average time for each epoch is around 38 seconds, the average time for the Tucker-decomposed network is 26 seconds, and the average time for the TT-decomposed network is 27 seconds.  In terms of accuracy, the TT-decomposed network outperforms Tucker in both training and testing, and is almost comparable to the original network before compression.
@@ -139,6 +149,9 @@ In a typical training process, the profiling output is:
 
 * Yin, M., Liao, S., Liu, X.Y., Wang, X. and Yuan, B., 2020. Compressing Recurrent Neural Networks Using Hierarchical Tucker Tensor Decomposition. arXiv, pp.arXiv-2005.
   * *Notes: applies HT to LSTMs*
+  
+*Newman, Elizabeth, et al. "Stable tensor neural networks for rapid deep learning." arXiv preprint arXiv:1811.06569 (2018).
+  * *Notes: transform-based tensor neural network*
   
 ### Related Github repos:
 
