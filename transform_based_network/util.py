@@ -162,11 +162,6 @@ def train_transform(i, model, trainloader, testloader, optimizer):
     print('Best training accuracy overall: ', max(test_acc))
     return train_acc, test_acc
 
-model = Transform_Net()
-optimizer = optim.SGD(model.parameters(), lr=0.1, momentum=0.9, weight_decay=5e-4)
-trainloader, testloader = load_mnist()
-train_acc, test_acc = train_transform(25, model, trainloader, testloader, optimizer)
-
 
 
 
