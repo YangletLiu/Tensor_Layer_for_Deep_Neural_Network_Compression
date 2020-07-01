@@ -18,7 +18,49 @@ def bcirc(A):
         bcirc_A.append(torch.roll(A, shifts=i, dims=0))
     return torch.cat(bcirc_A, dim=2).reshape(l*m, l*n)
 
+def hankel(A):
+    l, m, n = A.shape
+    circ = torch.zeros(2 * l + 1, m, n)
+    circ[l, ...] = torch.zeros(m, n)
+    for i in range(l):
+        k = circ.shape[0] - i - 1
+        circ[i, ...] = A[i, ...]
+        circ[k, ...] = A[i, ...]
+    hankel_A = []
+    for i in range(1, l + 1):
+        hankel_A.append(circ[i : i + l, ...])
+    hankel_A = torch.cat(hankel_A, dim=2).reshape(l*m, l*n)
+    return hankel_A
+
+def toeplitz(A):
+    l, m, n = A.shape
+    circ = torch.zeros(2 * l - 1, m, n)
+    for i in range(l):
+        k = circ.shape[0] - i - 1
+        circ[i, ...] = A[i, ...]
+        circ[k, ...] = A[i, ...]
+    toeplitz_A = []
+    for i in range(0, l):
+        toeplitz_A.append(circ[i : i + l, ...])
+    toeplitz_A = torch.cat(toeplitz_A, dim=2).reshape(l*m, l*n)
+    return toeplitz_A
+
+def tph(A):
+    return toeplitz(A) + hankel(A)
+
 def t_product(A, B):
+    assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
+    prod = torch.mm(tph(A), tph(B)[..., 0:B.shape[2]])
+    return prod.reshape(A.shape[0], A.shape[1], B.shape[2])
+
+def t_product_v2(A, B):
+    assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
+    dct_C = torch.zeros(A.shape[0], A.shape[1], B.shape[2])
+    for k in range(A.shape[0]):
+        dct_C[k, ...] = torch.mm(dct.dct(A)[k, ...], dct.dct(B)[k, ...])
+    return dct.idct(dct_C)
+
+def t_product_fft(A, B):
     assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
     prod = torch.mm(bcirc(A), bcirc(B)[:, 0:B.shape[2]])
     return prod.reshape(A.shape[0], A.shape[1], B.shape[2])
@@ -50,118 +92,6 @@ def raw_img(img, batch_size, n):
     single_img_T = [torch.transpose(i.reshape(n, n, 1), 0, 1) for i in single_img]
     ultra_img = torch.cat(single_img_T, dim=2)
     return ultra_img
-
-class Transform_Layer(nn.Module):
-    def __init__(self, size_in, size_out, n):
-        super().__init__()
-        self.size_in = size_in
-        self.size_out = size_out
-        weights = torch.randn(size_in, size_out, n)
-        bias = torch.randn(size_in, size_out, 1)
-        self.weights = nn.Parameter(weights, requires_grad=True)
-        self.bias = nn.Parameter(bias, requires_grad=True)
-        
-    def forward(self, x):
-        Wx = t_product(self.weights, x)
-        return torch.add(Wx, self.bias)
-
-class Transform_Net(nn.Module):
-    def __init__(self):
-        super(Transform_Net, self).__init__()
-        self.features = nn.Sequential(
-            Transform_Layer(28, 28, 28),
-            nn.ReLU(inplace=True),
-            Transform_Layer(28, 28, 28),
-            nn.ReLU(inplace=True),
-            Transform_Layer(28, 10, 28),
-        )
-
-    def forward(self, x):
-        x.requires_grad = True
-        x = self.features(x)        
-        return x
-
-def train_step_transform(epoch, train_acc, model, trainloader, optimizer):  
-    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    model = model.to(device)
-    model.train()
-    train_loss = 0.0
-    correct = 0
-    total = 0
-    criterion = nn.CrossEntropyLoss()
-    
-    print('\nEpoch: ', epoch)
-    print('|', end='')
-    for batch_idx, (inputs, labels) in enumerate(trainloader):   
-        inputs = raw_img(inputs, inputs.size(0), 28)
-        inputs = inputs.to(device)
-        labels = labels.to(device)
-        
-        outputs = model(inputs) / 1e4
-        outputs = torch.transpose(scalar_tubal_func(outputs), 0, 1)
-        
-        optimizer.zero_grad()
-        loss = criterion(outputs, labels)
-        if np.isnan(loss.item()):
-            print('Training terminated due to instability')
-            break
-        loss.backward()
-        optimizer.step()
-        train_loss += loss.item()  
-        _, predicted = torch.max(outputs, 1)
-        total += labels.size(0)
-        correct += predicted.eq(labels).sum().item()
-        if batch_idx % 10 == 0:
-            print('=', end='')
-    print('|', 'Accuracy:', correct / total, 'Loss:', train_loss / total)
-    train_acc.append(correct / total)
-    return train_acc
-
-def test_transform(test_acc, model, testloader):
-    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    model = model.to(device)
-    model.eval()
-    test_loss = 0
-    correct = 0
-    total = 0
-    criterion = nn.CrossEntropyLoss()
-    s = time.time()
-    with torch.no_grad():
-        print('|', end='')
-        for batch_idx, (inputs, targets) in enumerate(testloader):
-            inputs = raw_img(inputs, inputs.size(0), 28)
-            inputs = inputs.to(device)
-            targets = targets.to(device)
-            outputs = model(inputs) / 1e4
-            outputs = torch.transpose(scalar_tubal_func(outputs), 0, 1)
-            loss = criterion(outputs, targets)
-            test_loss += loss.item()
-            _, predicted = outputs.max(1)
-            total += targets.size(0)
-            correct += predicted.eq(targets).sum().item()
-            if batch_idx % 10 == 0:
-                print('=', end='')
-    e = time.time() 
-    print('|', ' Test accuracy:', correct / total, 'Test loss:', test_loss / total)
-    print('The inference time is', e - s, 'seconds')
-    test_acc.append(correct / total)
-    return test_acc, e - s
-    
-def train_transform(i, model, trainloader, testloader, optimizer):
-    train_acc, test_acc = [], []
-    scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
-    
-    for epoch in range(i):
-        s = time.time()
-        train_acc = train_step_transform(epoch, train_acc, model, trainloader, optimizer)
-        test_acc, _ = test_transform(test_acc, model, testloader)
-        scheduler.step()
-        e = time.time()
-        print('This epoch took', e - s, 'seconds to train')
-        print('Current learning rate: ', scheduler.get_last_lr()[0])
-    print('Best training accuracy overall: ', max(test_acc))
-    return train_acc, test_acc
-
 
 
 
