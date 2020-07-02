@@ -29,35 +29,39 @@ def hankel(A):
     hankel_A = []
     for i in range(1, l + 1):
         hankel_A.append(circ[i : i + l, ...])
-    hankel_A = torch.cat(hankel_A, dim=2).reshape(l*m, l*n)
-    return hankel_A
+    return torch.cat(hankel_A, dim=2).reshape(l*m, l*n)
 
 def toeplitz(A):
     l, m, n = A.shape
     circ = torch.zeros(2 * l - 1, m, n)
     for i in range(l):
-        k = circ.shape[0] - i - 1
-        circ[i, ...] = A[i, ...]
-        circ[k, ...] = A[i, ...]
+        circ[i + l - 1, ...] = A[i, ...]
+        circ[l - i - 1, ...] = A[i, ...]
     toeplitz_A = []
-    for i in range(0, l):
-        toeplitz_A.append(circ[i : i + l, ...])
-    toeplitz_A = torch.cat(toeplitz_A, dim=2).reshape(l*m, l*n)
-    return toeplitz_A
+    for i in range(l):
+        toeplitz_A.append(circ[l - i - 1: 2 * l - i - 1, ...])
+    return torch.cat(toeplitz_A, dim=2).reshape(l*m, l*n)
 
 def tph(A):
     return toeplitz(A) + hankel(A)
 
+def shift(X):
+    A = X.clone()
+    for i in range(1, A.shape[0]):
+        k = A.shape[0] - i - 1
+        A[k, ...] -= A[k + 1, ...]
+    return A
+
 def t_product(A, B):
     assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
-    prod = torch.mm(tph(A), tph(B)[..., 0:B.shape[2]])
+    prod = torch.mm(tph(shift(A)), bcirc(B)[:, 0:B.shape[2]])
     return prod.reshape(A.shape[0], A.shape[1], B.shape[2])
 
 def t_product_v2(A, B):
-    assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
+    # assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
     dct_C = torch.zeros(A.shape[0], A.shape[1], B.shape[2])
     for k in range(A.shape[0]):
-        dct_C[k, ...] = torch.mm(dct.dct(A)[k, ...], dct.dct(B)[k, ...])
+        dct_C[..., k] = torch.mm(dct.dct(A)[..., k], dct.dct(B)[..., k])
     return dct.idct(dct_C)
 
 def t_product_fft(A, B):
@@ -65,17 +69,12 @@ def t_product_fft(A, B):
     prod = torch.mm(bcirc(A), bcirc(B)[:, 0:B.shape[2]])
     return prod.reshape(A.shape[0], A.shape[1], B.shape[2])
 
-def h_func_dct(lateral_slice):
-    l, m, n = lateral_slice.shape
-    dct_slice = dct.dct(lateral_slice)
-    tubes = [dct_slice[i, :, 0] for i in range(l)]
-    h_tubes = []
-    for tube in tubes:
-        tube_sum = torch.sum(torch.exp(tube))
-        h_tubes.append(torch.exp(tube) / tube_sum)
-    res_slice = torch.stack(h_tubes, dim=0).reshape(l, m, n)
-    idct_a = dct.idct(res_slice)
-    return torch.sum(idct_a, dim=0)
+def t_product_fft_v2(A, B):
+    assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
+    dct_C = np.zeros((A.shape[0], A.shape[1], B.shape[2]))
+    for k in range(A.shape[0]):
+        dct_C[k, ...] = np.fft.fft(A, axis=0)[k, ...] @ np.fft.fft(B, axis=0)[k, ...]
+    return np.real(np.fft.ifft(dct_C, axis=0))
 
 def scalar_tubal_func(output_tensor):
     l, m, n = output_tensor.shape
