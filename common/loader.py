@@ -15,6 +15,18 @@ def load_mnist():
     testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=0)
     return trainloader, testloader
 
+def load_fashion_mnist():
+    print('==> Loading data..')
+    transform_train = transforms.Compose([transforms.ToTensor()])
+    transform_test = transforms.Compose([transforms.ToTensor()])
+
+    trainset = torchvision.datasets.FashionMNIST(root='./data', train=True, download=True, transform=transform_train)
+    trainloader = torch.utils.data.DataLoader(trainset, batch_size=100, shuffle=True, num_workers=0)
+
+    testset = torchvision.datasets.FashionMNIST(root='./data', train=False, download=True, transform=transform_test)
+    testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=0)
+    return trainloader, testloader
+
 def load_cifar10():
     print('==> Loading data..')
     transform_train = transforms.Compose([
