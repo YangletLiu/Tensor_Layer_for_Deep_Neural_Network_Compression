@@ -43,7 +43,8 @@ def toeplitz(A):
     return torch.cat(toeplitz_A, dim=2).reshape(l*m, l*n)
 
 def tph(A):
-    return toeplitz(A) + hankel(A)
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    return torch.Tensor(toeplitz(A) + hankel(A)).to(device)
 
 def shift(X):
     A = X.clone()
@@ -71,7 +72,7 @@ def t_product_fft(A, B):
 
 def t_product_fft_v2(A, B):
     assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
-    dct_C = np.zeros((A.shape[0], A.shape[1], B.shape[2]))
+    dct_C = np.zeros((A.shape[0], A.shape[1], B.shape[2]), dtype=complex)
     for k in range(A.shape[0]):
         dct_C[k, ...] = np.fft.fft(A, axis=0)[k, ...] @ np.fft.fft(B, axis=0)[k, ...]
     return np.real(np.fft.ifft(dct_C, axis=0))
