@@ -9,6 +9,10 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 from torch.optim.lr_scheduler import StepLR
+import sys
+sys.path.append('..')
+from transform_based_network import *
+from common import *
 
 class Transform_Layer(nn.Module):
     def __init__(self, n, size_in, m, size_out):

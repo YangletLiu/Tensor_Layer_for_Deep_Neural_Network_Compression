@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../')
 from common import *
+from transform_based_network import *
 
 import torch
 import torch_dct as dct
@@ -85,6 +86,24 @@ def scalar_tubal_func(output_tensor):
         h_slice.append(h_func_dct(slice))
     pro_matrix = torch.stack(h_slice, dim=2)
     return pro_matrix.reshape(m, n)
+
+def h_func_dct(lateral_slice):
+    l, m, n = lateral_slice.shape
+
+    dct_slice = dct.dct(lateral_slice)
+
+    tubes = [dct_slice[i, :, 0] for i in range(l)]
+
+    h_tubes = []
+    for tube in tubes:
+        tube_sum = torch.sum(torch.exp(tube))
+        h_tubes.append(torch.exp(tube) / tube_sum)
+
+    res_slice = torch.stack(h_tubes, dim=0).reshape(l, m, n)
+
+    idct_a = dct.idct(res_slice)
+
+    return torch.sum(idct_a, dim=0)                                                                                                                          
 
 def raw_img(img, batch_size, n):
     img_raw = img.reshape(batch_size, n * n)

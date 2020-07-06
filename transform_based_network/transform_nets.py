@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../')
 from common import *
+from .transform_layer import *
 
 import torch
 import torch_dct as dct

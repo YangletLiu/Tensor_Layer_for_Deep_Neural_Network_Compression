@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../')
 from common import *
+from transform_based_network import *
 
 import torch
 import torch_dct as dct
@@ -60,7 +61,7 @@ def test(test_acc, model, testloader):
             inputs = raw_img(inputs, inputs.size(0), 28)
             inputs = inputs.to(device)
             targets = targets.to(device)
-            outputs = model(inputs) / 1e3
+            outputs = model(inputs) / 1e5
             outputs = torch.transpose(scalar_tubal_func(outputs), 0, 1)
             loss = criterion(outputs, targets)
             test_loss += loss.item()
