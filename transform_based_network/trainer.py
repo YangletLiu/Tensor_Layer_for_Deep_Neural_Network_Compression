@@ -11,6 +11,7 @@ import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 from torch.optim.lr_scheduler import StepLR
 
+
 def train_step_transform(epoch, train_acc, model, trainloader, optimizer):  
     device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
     model = model.to(device)
@@ -23,14 +24,17 @@ def train_step_transform(epoch, train_acc, model, trainloader, optimizer):
     print('\nEpoch: ', epoch)
     print('|', end='')
     for batch_idx, (inputs, labels) in enumerate(trainloader):   
-        inputs = raw_img(inputs, inputs.size(0), 28)
         inputs = inputs.to(device)
+        if not inputs.shape[0] == 100:
+            break
+
         labels = labels.to(device)
-        outputs = model(inputs) / 1e5
+        outputs = model(inputs) 
         outputs = torch.transpose(scalar_tubal_func(outputs), 0, 1)
         
         optimizer.zero_grad()
         loss = criterion(outputs, labels)
+        # print(loss)
         if np.isnan(loss.item()):
             print('Training terminated due to instability')
             break
@@ -58,10 +62,11 @@ def test(test_acc, model, testloader):
     with torch.no_grad():
         print('|', end='')
         for batch_idx, (inputs, targets) in enumerate(testloader):
-            inputs = raw_img(inputs, inputs.size(0), 28)
             inputs = inputs.to(device)
+            if not inputs.shape[0] == 100:
+                break
             targets = targets.to(device)
-            outputs = model(inputs) / 1e5
+            outputs = model(inputs) 
             outputs = torch.transpose(scalar_tubal_func(outputs), 0, 1)
             loss = criterion(outputs, targets)
             test_loss += loss.item()
@@ -78,7 +83,7 @@ def test(test_acc, model, testloader):
     
 def train_transform(i, model, trainloader, testloader, optimizer):
     train_acc, test_acc = [], []
-    scheduler = StepLR(optimizer, step_size=5, gamma=0.5)
+    scheduler = StepLR(optimizer, step_size=1, gamma=0.95)
     
     for epoch in range(i):
         s = time.time()
@@ -88,6 +93,6 @@ def train_transform(i, model, trainloader, testloader, optimizer):
         scheduler.step()
         
         print('This epoch took', e - s, 'seconds to train')
-        print('Current learning rate: ', scheduler.get_last_lr()[0])
-    print('Best training accuracy overall: ', max(test_acc))
+        print('Current learning rate:', scheduler.get_last_lr()[0])
+    print('Best training accuracy overall:', max(test_acc))
     return train_acc, test_acc

@@ -26,4 +26,4 @@ class Transform_Layer(nn.Module):
         
     def forward(self, x):
         device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-        return torch.add(t_product(self.weights, x).to(device), self.bias)
+        return torch.add(t_product_fft(self.weights, x).to(device), self.bias)
