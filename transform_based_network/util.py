@@ -44,8 +44,8 @@ def toeplitz(A):
     return torch.cat(toeplitz_A, dim=2).reshape(l*m, l*n)
 
 def tph(A):
-    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    return torch.Tensor(toeplitz(A) + hankel(A)).to(device)
+    #device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    return torch.Tensor(toeplitz(A) + hankel(A))#.to(device)
 
 def shift(X):
     A = X.clone()
@@ -60,11 +60,13 @@ def t_product(A, B):
     return prod.reshape(A.shape[0], A.shape[1], B.shape[2])
 
 def t_product_v2(A, B):
-    # assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
+    assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
     dct_C = torch.zeros(A.shape[0], A.shape[1], B.shape[2])
+    dct_A = torch.transpose(dct.dct(torch.transpose(A, 0, 2)), 0, 2)
+    dct_B = torch.transpose(dct.dct(torch.transpose(B, 0, 2)), 0, 2)
     for k in range(A.shape[0]):
-        dct_C[..., k] = torch.mm(dct.dct(A)[..., k], dct.dct(B)[..., k])
-    return dct.idct(dct_C)
+        dct_C[k, ...] = torch.mm(dct_A[k, ...], dct_B[k, ...])
+    return torch.transpose(dct.idct(torch.transpose(dct_C, 0, 2)), 0, 2)
 
 def t_product_fft(A, B):
     assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
@@ -97,13 +99,29 @@ def h_func_dct(lateral_slice):
     res_slice = torch.stack(h_tubes, dim=0).reshape(l, m, n)
     idct_a = dct.idct(res_slice)
     return torch.sum(idct_a, dim=0)                                                                                                                          
-
 def raw_img(img, batch_size, n):
     img_raw = img.reshape(batch_size, n * n)
     single_img = torch.split(img_raw, split_size_or_sections=1, dim=0)
     single_img_T = [torch.transpose(i.reshape(n, n, 1), 0, 1) for i in single_img]
     ultra_img = torch.cat(single_img_T, dim=2)
     return ultra_img
+
+def torch_apply(func, x):
+    x = func(torch.transpose(x, 0, 2))
+    return torch.transpose(x, 0, 2)
+
+def make_weights(shape, device='cpu', scale=0.01):
+    w = torch.randn(shape[0], shape[1], shape[1]) * scale
+    b = torch.randn(shape) * scale
+    dct_w = torch_apply(dct.dct, w).to(device)
+    dct_b = torch_apply(dct.dct, b).to(device)
+    return dct_w, dct_b
+
+def to_categorical(y, num_classes):
+    categorical = torch.empty(len(y), num_classes)
+    for i in range(len(y)):
+        categorical[i, :] = torch.eye(num_classes, num_classes)[y[i]]
+    return categorical
 
 
 
