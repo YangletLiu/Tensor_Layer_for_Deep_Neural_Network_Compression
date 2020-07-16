@@ -1,7 +1,3 @@
-import sys
-sys.path.append('../')
-from common import *
-
 import torch
 import torch_dct as dct
 import torch.nn as nn
@@ -10,9 +6,10 @@ import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 from torch.optim.lr_scheduler import StepLR
 import sys
-sys.path.append('..')
-from transform_based_network import *
+sys.path.append('../')
 from common import *
+from transform_based_network import *
+
 
 class Transform_Layer(nn.Module):
     def __init__(self, n, size_in, m, size_out):
@@ -26,4 +23,14 @@ class Transform_Layer(nn.Module):
         
     def forward(self, x):
         device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-        return torch.add(t_product_fft(self.weights, x).to(device), self.bias)
+        return torch.add(t_product_v2(self.weights, x).to(device), self.bias)
+    
+class T_Layer(nn.Module):
+    def __init__(self, dct_w, dct_b):
+        super(T_Layer, self).__init__()
+        self.weights = nn.Parameter(dct_w, requires_grad=True)
+        self.bias = nn.Parameter(dct_b, requires_grad=True)
+        
+    def forward(self, dct_x):
+        x = torch.mm(self.weights, dct_x) + self.bias
+        return x

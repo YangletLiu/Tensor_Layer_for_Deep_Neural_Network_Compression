@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../')
 from common import *
-from .transform_layer import *
+from transform_based_network import *
 
 import torch
 import torch_dct as dct
@@ -31,7 +31,7 @@ class Transform_Net(nn.Module):
 
 class Conv_Transform_Net(nn.Module):
     def __init__(self, batch_size):
-        super(T_Net, self).__init__()
+        super(Conv_Transform_Net, self).__init__()
         self.first = nn.Sequential(
             Transform_Layer(28, 28, batch_size, 28),
             nn.ReLU(inplace=True),
@@ -63,7 +63,7 @@ class Conv_Transform_Net(nn.Module):
     
 class Conv_Transform_Net_CIFAR(nn.Module):
     def __init__(self, batch_size):
-        super(T_Net_CIFAR, self).__init__()
+        super(Conv_Transform_Net_CIFAR, self).__init__()
         self.batch_size = batch_size
         self.first = nn.Sequential(
             Transform_Layer(96, 32, batch_size, 32),
@@ -105,3 +105,37 @@ class Conv_Transform_Net_CIFAR(nn.Module):
         x = self.last(x)
         
         return x
+    
+class Frontal_Slice(nn.Module):
+    def __init__(self, dct_w, dct_b):
+        super(Frontal_Slice, self).__init__()
+        self.device = dct_w.device
+        self.dct_linear = T_Layer(dct_w, dct_b)
+        
+    def forward(self, dct_x):
+        return self.dct_linear(dct_x.to(self.device))
+    
+    
+class Ensemble(nn.Module):
+    def __init__(self, shape, device='cpu'):
+        super(Ensemble, self).__init__()
+        self.device = device    
+        self.models = []
+        for i in range(shape[0]):
+            dct_w, dct_b = make_weights(shape, device)
+            model = Frontal_Slice(dct_w[i, ...], dct_b[i, ...])
+            self.models.append(model.to(device))
+        
+    def forward(self, x):
+        s = self.models[0].dct_linear.weights.shape
+        result = torch.empty(x.shape[0], s[0], x.shape[2])
+        dct_x = torch_apply(dct.dct, x).to(self.device)
+        
+        for i in range(len(self.models)):
+            result[i, ...] = self.models[i](dct_x[i, ...])
+
+        result = torch_apply(dct.idct, result)
+        result = torch.transpose(result, 0, 2)
+        result = torch.transpose(result, 0, 1)
+        softmax = scalar_tubal_func(result)
+        return torch.transpose(softmax, 0, 1)
