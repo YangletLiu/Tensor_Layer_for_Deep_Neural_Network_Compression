@@ -24,7 +24,7 @@ class Transform_Net(nn.Module):
         )
 
     def forward(self, x):
-        x = raw_img(x, x.size(0), 28)
+        x = torch_shift(x)
         x = self.features(x)        
         return x / 1e5
     
@@ -44,7 +44,7 @@ class Conv_Transform_Net(nn.Module):
         self.last = Transform_Layer(28, 28, batch_size, 10)
 
     def forward(self, x):
-        x = raw_img(x, x.size(0), 28)
+        x = torch_shift(x)
         x = self.first(x)
         
         x = torch.transpose(x, 0, 2)
@@ -54,8 +54,7 @@ class Conv_Transform_Net(nn.Module):
         x = self.intermediate(x)
         
         x = x.reshape(100, 28, 28)
-        x = torch.transpose(x, 0, 2)
-        x = torch.transpose(x, 0, 1)
+        x = torch_shift(x)
         x = self.last(x)
         
         return x / 5e2
@@ -90,8 +89,7 @@ class Conv_Transform_Net_CIFAR(nn.Module):
         
     def forward(self, x):
         x = torch.reshape(x, (100, 96, 32))
-        x = torch.transpose(x, 0, 2)
-        x = torch.transpose(x, 0, 1)
+        x = torch_shift(x)
         x = self.first(x)
         
         x = torch.transpose(x, 0, 2)
@@ -100,8 +98,7 @@ class Conv_Transform_Net_CIFAR(nn.Module):
         x = self.intermediate(x)
 
         x = x.reshape(self.batch_size, 96, 32)
-        x = torch.transpose(x, 0, 2)
-        x = torch.transpose(x, 0, 1)
+        x = torch_shift(x)
         x = self.last(x)
         
         return x
@@ -135,7 +132,6 @@ class Ensemble(nn.Module):
             result[i, ...] = self.models[i](dct_x[i, ...])
 
         result = torch_apply(dct.idct, result)
-        result = torch.transpose(result, 0, 2)
-        result = torch.transpose(result, 0, 1)
+        result = torch_shift(result)
         softmax = scalar_tubal_func(result)
         return torch.transpose(softmax, 0, 1)
