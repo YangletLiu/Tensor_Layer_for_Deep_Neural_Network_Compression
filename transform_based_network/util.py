@@ -62,11 +62,11 @@ def t_product(A, B):
 def t_product_v2(A, B):
     assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
     dct_C = torch.zeros(A.shape[0], A.shape[1], B.shape[2])
-    dct_A = torch.transpose(dct.dct(torch.transpose(A, 0, 2)), 0, 2)
-    dct_B = torch.transpose(dct.dct(torch.transpose(B, 0, 2)), 0, 2)
+    dct_A = torch_apply(dct.dct, A)
+    dct_B = torch_apply(dct.dct, B)
     for k in range(A.shape[0]):
         dct_C[k, ...] = torch.mm(dct_A[k, ...], dct_B[k, ...])
-    return torch.transpose(dct.idct(torch.transpose(dct_C, 0, 2)), 0, 2)
+    return torch_apply(dct.idct, dct_C)
 
 def t_product_fft(A, B):
     assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
@@ -84,8 +84,8 @@ def scalar_tubal_func(output_tensor):
     l, m, n = output_tensor.shape
     lateral_slices = [output_tensor[:, :, i].reshape(l, m, 1) for i in range(n)]
     h_slice = []
-    for slice in lateral_slices:
-        h_slice.append(h_func_dct(slice))
+    for s in lateral_slices:
+        h_slice.append(h_func_dct(s))
     pro_matrix = torch.stack(h_slice, dim=2)
     return pro_matrix.reshape(m, n)
 
@@ -97,22 +97,16 @@ def h_func_dct(lateral_slice):
     for tube in tubes:
         h_tubes.append(torch.exp(tube) / torch.sum(torch.exp(tube)))
     res_slice = torch.stack(h_tubes, dim=0).reshape(l, m, n)
-    idct_a = dct.idct(res_slice)
-    return torch.sum(idct_a, dim=0)                                                                                                                          
-def raw_img(img, batch_size, n):
-    img_raw = img.reshape(batch_size, n * n)
-    single_img = torch.split(img_raw, split_size_or_sections=1, dim=0)
-    single_img_T = [torch.transpose(i.reshape(n, n, 1), 0, 1) for i in single_img]
-    ultra_img = torch.cat(single_img_T, dim=2)
-    return ultra_img
+    idct_a = res_slice#dct.idct(res_slice)
+    return torch.sum(idct_a, dim=0)                                                                               
 
 def torch_apply(func, x):
     x = func(torch.transpose(x, 0, 2))
     return torch.transpose(x, 0, 2)
 
 def make_weights(shape, device='cpu', scale=0.01):
-    w = torch.randn(shape[0], shape[1], shape[1]) * scale
-    b = torch.randn(shape) * scale
+    w = torch.randn(shape[0], 10, shape[1]) * scale
+    b = torch.randn(shape[0], 10, shape[2]) * scale
     dct_w = torch_apply(dct.dct, w).to(device)
     dct_b = torch_apply(dct.dct, b).to(device)
     return dct_w, dct_b
@@ -123,7 +117,11 @@ def to_categorical(y, num_classes):
         categorical[i, :] = torch.eye(num_classes, num_classes)[y[i]]
     return categorical
 
-
+def torch_shift(A):
+    x = A.squeeze()
+    x = torch.transpose(x, 0, 2)
+    x = torch.transpose(x, 0, 1)
+    return x
 
 
 

@@ -16,14 +16,15 @@ class Transform_Layer(nn.Module):
         super().__init__()
         self.size_in = size_in
         self.size_out = size_out
-        weights = torch.randn(n, size_out, size_in)
+        weights = torch.randn(n, size_out, size_in) * 0.01
         bias = torch.randn(1, size_out, m)
         self.weights = nn.Parameter(weights, requires_grad=True)
         self.bias = nn.Parameter(bias, requires_grad=True)
         
     def forward(self, x):
         device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-        return torch.add(t_product_v2(self.weights, x).to(device), self.bias)
+        return t_product_v2(self.weights, x).to(device) #/ 1e2
+    #torch.add(t_product_v2(self.weights, x).to(device), self.bias)
     
 class T_Layer(nn.Module):
     def __init__(self, dct_w, dct_b):

@@ -16,17 +16,17 @@ class Transform_Net(nn.Module):
     def __init__(self, batch_size):
         super(Transform_Net, self).__init__()
         self.features = nn.Sequential(
-            Transform_Layer(28, 28, batch_size, 28),
-            nn.ReLU(inplace=True),
-            Transform_Layer(28, 28, batch_size, 28),
-            nn.ReLU(inplace=True),
+            #Transform_Layer(28, 28, batch_size, 28),
+            #nn.ReLU(inplace=True),
+            #Transform_Layer(28, 28, batch_size, 28),
+            #nn.ReLU(inplace=True),
             Transform_Layer(28, 28, batch_size, 10),
         )
 
     def forward(self, x):
-        x = torch_shift(x)
-        x = self.features(x)        
-        return x / 1e5
+        self.x = torch_shift(x)
+        self.x = self.features(self.x)        
+        return self.x / 1e2#/ 1e2
     
 
 class Conv_Transform_Net(nn.Module):
