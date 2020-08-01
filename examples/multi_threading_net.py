@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 from multiprocessing import Pool, Queue, Process, set_start_method
 import multiprocessing as mp_
+from joblib import Parallel, delayed
 
 import time
 import pkbar
