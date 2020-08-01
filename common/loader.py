@@ -2,6 +2,8 @@ import torch
 import torchvision
 import torchvision.transforms as transforms
 from torchvision import models
+import os
+
 
 def load_mnist():
     print('==> Loading data..')
@@ -71,9 +73,12 @@ def load_cifar100():
     
     return trainloader, testloader
 
-def load_mnist_multiprocess():
+def load_mnist_multiprocess(override=0):
     print('==> Loading data..')
-    cpu_count = os.cpu_count()
+    if override:
+        cpu_count = override
+    else:
+        cpu_count = os.cpu_count()
     transform_train = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
     transform_test = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))])
 
