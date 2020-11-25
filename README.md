@@ -58,6 +58,8 @@ Have not yet developed.
 ## Transform-based networks
 This network is trained in the transform domain: the weights and the training data are passed into the network after applying a tensor product between them.  The outputs are evaluated against the tubal version of the softmax objective function after an inverse transformation (idct) in the last layer.  The backprop process is handled by the pytorch's builtin autograd functions.
 
+To see the how the fully-connected transform-based network runs on MNIST, run the demo in new_transform.ipynb.
+
 ## Experiments
 I tested the performance of the three compression methods against the uncompressed network on the MNIST and the CIFAR10 datasets.  I tried to keep all hyperparameters the same for all tests, including rank, number of epochs, and learning rate.  However, as CP is too sensitive to learning rate, I give it a much smaller value for learning rate.
 
