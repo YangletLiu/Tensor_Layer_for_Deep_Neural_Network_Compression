@@ -44,8 +44,8 @@ def toeplitz(A):
     return torch.cat(toeplitz_A, dim=2).reshape(l*m, l*n)
 
 def tph(A):
-    #device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
-    return torch.Tensor(toeplitz(A) + hankel(A))#.to(device)
+    device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+    return torch.Tensor(toeplitz(A) + hankel(A)).to(device)
 
 def shift(X):
     A = X.clone()
@@ -59,7 +59,7 @@ def t_product(A, B):
     prod = torch.mm(tph(shift(A)), bcirc(B)[:, 0:B.shape[2]])
     return prod.reshape(A.shape[0], A.shape[1], B.shape[2])
 
-def t_product_v2(A, B):
+def dct_t_product(A, B):
     assert(A.shape[0] == B.shape[0] and A.shape[2] == B.shape[1])
     dct_C = torch.zeros(A.shape[0], A.shape[1], B.shape[2])
     dct_A = torch_apply(dct.dct, A)
@@ -97,7 +97,7 @@ def h_func_dct(lateral_slice):
     for tube in tubes:
         h_tubes.append(torch.exp(tube) / torch.sum(torch.exp(tube)))
     res_slice = torch.stack(h_tubes, dim=0).reshape(l, m, n)
-    idct_a = res_slice#dct.idct(res_slice)
+    idct_a = dct.idct(res_slice)
     return torch.sum(idct_a, dim=0)                                                                               
 
 def torch_apply(func, x):
@@ -123,7 +123,24 @@ def torch_shift(A):
     x = torch.transpose(x, 0, 1)
     return x
 
+def cifar_img_process(raw_img):
+    k, l, m, n = raw_img.shape
+    img_list = torch.split(raw_img, split_size_or_sections=1, dim=0)
+    list = []
+    for img in img_list:
+        img = img.reshape(l, m, n)
+        frontal = torch.cat([img[i, :, :] for i in range(l)], dim=0)
+        single_img = torch.transpose(frontal.reshape(1, l * m, n), 0, 2)
+        list.append(single_img)
+    ultra_img = torch.cat(list, dim=2)
+    return ultra_img
 
+def raw_img(img, batch_size, n):
+    img_raw = img.reshape(batch_size, n * n)
+    single_img = torch.split(img_raw, split_size_or_sections=1, dim=0)
+    single_img_T = [torch.transpose(i.reshape(n, n, 1), 0, 1) for i in single_img]
+    ultra_img = torch.cat(single_img_T, dim=2)
+    return ultra_img
 
 
 
