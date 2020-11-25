@@ -20,6 +20,7 @@ from common import *
 from transform_based_network import *
 
 
+# Layer definition
 class T_Layer(nn.Module):
     def __init__(self, dct_w, dct_b):
         super(T_Layer, self).__init__()
@@ -30,7 +31,9 @@ class T_Layer(nn.Module):
         x = torch.mm(self.weights, dct_x) + self.bias
         return x
 
-    
+
+# Model definition
+# This model is going to be run in parallel
 class Frontal_Slice(nn.Module):
     def __init__(self, dct_w, dct_b):
         super(Frontal_Slice, self).__init__()
@@ -38,22 +41,15 @@ class Frontal_Slice(nn.Module):
         self.dct_linear = nn.Sequential(
             T_Layer(dct_w, dct_b),
         )
-        #nn.ReLU(inplace=True),
-        #self.linear1 = nn.Linear(28, 28)
-        #nn.ReLU(inplace=True),
-        #self.classifier = nn.Linear(28, 10)
         
     def forward(self, x):
-        #x = torch.transpose(x, 0, 1).to(self.device)
         x = self.dct_linear(x)
-        #x = self.linear1(x)
-        #x = self.classifier(x)
-        #x = torch.transpose(x, 0, 1)
         return x
 
 
+# This function conducts backprop for a FrontalSlice model
+# This function is going to be run in parallel
 def train_slice(i, model, x_i, y, outputs, optimizer):
-    s = time.time()
     criterion = nn.CrossEntropyLoss()
     o = torch.stack(outputs)
     o[i, ...] = outputs_grad[i]
@@ -65,15 +61,15 @@ def train_slice(i, model, x_i, y, outputs, optimizer):
     loss = criterion(o, y) 
     loss.backward()
     optimizer.step()
-    e = time.time()
-    # print(e - s)
 
 
+# Load data
 device = 'cpu'
 batch_size = 100
 trainloader, testloader = load_mnist_multiprocess(batch_size)
 
 
+# Create m FrontalSlice models and initialize
 shape = (28, 28, batch_size)
 models = []
 ops = []
@@ -88,7 +84,6 @@ for i in range(shape[0]):
     model = Frontal_Slice(w_i, b_i)
     model.train()
     models.append(model.to(device))
-    
     op = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=5e-4)
     ops.append(op)
 
@@ -109,18 +104,16 @@ for e in range(epochs):
 
         dct_x = dct_x.to(device)
         y = y.to(device)            
-        
+       
         outputs_grad = []
         outputs = []
-        
         for i in range(len(models)):
             out = models[i](dct_x[i, ...])
             outputs_grad.append(out)
             outputs.append(out.detach())
-        
-        #for i in range(len(models)):
-        #    train_slice(i, models[i], dct_x[i, ...], y, outputs, ops[i])
             
+        # This line makes multiple calls to train_slice function
+        # Parallelization
         Parallel(n_jobs=16, prefer="threads", verbose=0)(
             delayed(train_slice)(i, models[i], dct_x[i, ...], y, outputs, ops[i]) \
             for i in range(len(models))
@@ -142,11 +135,9 @@ for e in range(epochs):
         losses += total_loss
         
         pbar.update(batch_idx)
-        # print(total_loss)
-        # print(predicted.eq(y).sum().item() / y.size(0))
         
     loss_list.append(losses / total)
-    3acc_list.append(correct / total)
+    acc_list.append(correct / total)
 
 
 '''
